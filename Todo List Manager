@@ -1,0 +1,77 @@
+#include <iostream>
+#include <vector>
+#include <string>
+
+struct Task {
+    std::string description;
+    bool completed;
+};
+
+void addTask(std::vector<Task>& tasks, const std::string& description) {
+    tasks.push_back({description, false});
+}
+
+void viewTasks(const std::vector<Task>& tasks) {
+    for (size_t i = 0; i < tasks.size(); ++i) {
+        std::cout << i + 1 << ". " << tasks[i].description 
+                  << " [" << (tasks[i].completed ? "Completed" : "Pending") << "]" << std::endl;
+    }
+}
+
+void markTaskCompleted(std::vector<Task>& tasks, size_t index) {
+    if (index < tasks.size()) {
+        tasks[index].completed = true;
+    }
+}
+
+void removeTask(std::vector<Task>& tasks, size_t index) {
+    if (index < tasks.size()) {
+        tasks.erase(tasks.begin() + index);
+    }
+}
+
+int main() {
+    std::vector<Task> tasks;
+    int choice;
+    std::string description;
+    size_t index;
+
+    do {
+        std::cout << "1. Add Task" << std::endl;
+        std::cout << "2. View Tasks" << std::endl;
+        std::cout << "3. Mark Task as Completed" << std::endl;
+        std::cout << "4. Remove Task" << std::endl;
+        std::cout << "5. Exit" << std::endl;
+        std::cout << "Enter your choice: ";
+        std::cin >> choice;
+
+        switch (choice) {
+            case 1:
+                std::cout << "Enter task description: ";
+                std::cin.ignore();
+                std::getline(std::cin, description);
+                addTask(tasks, description);
+                break;
+            case 2:
+                viewTasks(tasks);
+                break;
+            case 3:
+                std::cout << "Enter task number to mark as completed: ";
+                std::cin >> index;
+                markTaskCompleted(tasks, index - 1);
+                break;
+            case 4:
+                std::cout << "Enter task number to remove: ";
+                std::cin >> index;
+                removeTask(tasks, index - 1);
+                break;
+            case 5:
+                std::cout << "Exiting..." << std::endl;
+                break;
+            default:
+                std::cout << "Invalid choice. Please try again." << std::endl;
+        }
+    } while (choice != 5);
+
+    return 0;
+}
