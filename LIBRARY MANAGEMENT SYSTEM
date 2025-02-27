@@ -1,0 +1,109 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <unordered_map>
+#include <ctime>
+
+using namespace std;
+
+struct Book {
+    string title, author, ISBN;
+    bool available;
+};
+
+struct Borrower {
+    string name;
+    unordered_map<string, time_t> borrowedBooks;
+};
+
+vector<Book> books;
+unordered_map<string, Borrower> borrowers;
+
+void addBook() {
+    string title, author, ISBN;
+    cout << "Enter book title: ";
+    getline(cin, title);
+    cout << "Enter author: ";
+    getline(cin, author);
+    cout << "Enter ISBN: ";
+    getline(cin, ISBN);
+    books.push_back({title, author, ISBN, true});
+    cout << "Book added successfully!\n";
+}
+
+void searchBook() {
+    string query;
+    cout << "Enter title, author, or ISBN to search: ";
+    getline(cin, query);
+    for (const auto& book : books) {
+        if (book.title == query || book.author == query || book.ISBN == query) {
+            cout << "Title: " << book.title << " | Author: " << book.author << " | ISBN: " << book.ISBN << " | Available: " << (book.available ? "Yes" : "No") << endl;
+        }
+    }
+}
+
+void checkoutBook() {
+    string borrowerName, ISBN;
+    cout << "Enter borrower name: ";
+    getline(cin, borrowerName);
+    cout << "Enter ISBN of the book: ";
+    getline(cin, ISBN);
+    for (auto& book : books) {
+        if (book.ISBN == ISBN && book.available) {
+            book.available = false;
+            borrowers[borrowerName].name = borrowerName;
+            borrowers[borrowerName].borrowedBooks[ISBN] = time(nullptr);
+            cout << "Book checked out successfully.\n";
+            return;
+        }
+    }
+    cout << "Book not available.\n";
+}
+
+void returnBook() {
+    string borrowerName, ISBN;
+    cout << "Enter borrower name: ";
+    getline(cin, borrowerName);
+    cout << "Enter ISBN of the book: ";
+    getline(cin, ISBN);
+    if (borrowers.count(borrowerName) && borrowers[borrowerName].borrowedBooks.count(ISBN)) {
+        time_t borrowTime = borrowers[borrowerName].borrowedBooks[ISBN];
+        time_t currentTime = time(nullptr);
+        double days = difftime(currentTime, borrowTime) / (60 * 60 * 24);
+        double fine = (days > 14) ? (days - 14) * 2 : 0;
+        borrowers[borrowerName].borrowedBooks.erase(ISBN);
+        if (borrowers[borrowerName].borrowedBooks.empty()) borrowers.erase(borrowerName);
+        for (auto& book : books) {
+            if (book.ISBN == ISBN) {
+                book.available = true;
+                break;
+            }
+        }
+        cout << "Book returned successfully. Fine: Rs." << fine << "\n";
+    } else {
+        cout << "Invalid return request.\n";
+    }
+}
+
+int main() {
+    int choice;
+    while (true) {
+        cout << "\nLibrary Management System\n";
+        cout << "1. Add Book\n";
+        cout << "2. Search Book\n";
+        cout << "3. Checkout Book\n";
+        cout << "4. Return Book\n";
+        cout << "5. Exit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+        cin.ignore();
+        switch (choice) {
+            case 1: addBook(); break;
+            case 2: searchBook(); break;
+            case 3: checkoutBook(); break;
+            case 4: returnBook(); break;
+            case 5: return 0;
+            default: cout << "Invalid choice. Try again.\n";
+        }
+    }
+}
